@@ -1,0 +1,80 @@
+
+
+***************************
+Date: 26/02/2014
+Auteur: Marine Guémas
+***************************
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%						     %
+	%	Verification de la solution particuliere     %
+	%		    sur la bulle		     %
+	%						     %
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+*******************************************************************************************************
+% Contexte:
+-----------
+Soit une bulle remontant vers une surface libre, l'equation differentielle régissant la forme de 
+cette bulle est
+
+
+      sin(eta)*(ch-xi)*f" -[cos(eta)*(ch-xi)+2*(1-xi*ch)]*f'+ *ch*sin(eta)*f = -sin(eta)*[sigma0zzB + 3*lambda0*z']    
+                                         
+Avec en coordonnees spherique z' = cos(theta).
+
+On cherche une solution telle que le volume soit conservé (int_{0}^{pi} [sin(theta)*cos(theta)*f(theta)]=0)
+et que les conditions de tangentes horizontales soient vérifiées.
+
+On définit une solution particulière vérifiant les CL de tangentes horizontales telle que fp(0)=0 (la 
+solution est bornée) et fp'(pi)=0.
+Ainsi, on obtient en coordonnées sphériques (seule la contrainte est calculée en coordonnées bipolaire, ce qui
+permet d'obtenir très grande précision, pour le reste on repasse en sphérique pour plus de commodité)
+
+       fp(theta)=int_{0}^{theta} {sin(u)S(u) [(1+cos(theta)*log(tan(theta/2)))*cos(u)
+							- cos(theta)*(1+cos(u)*log(tan(u/2)))] du }
+
+Avec S(u)= -[sigma0zzB + 3*lambda0*cos(u)]
+
+Cette intégrale est calculée pour chaque valeur de theta sur [0,pi] avec u, la variable d'intégration
+dépendant de theta.
+
+On compare le résultat obtenu par résolution LU de l'équation différentielle et le résultat analytique
+selon le nombre de points Nx pour la discrétisation de theta. 
+
+*******************************************************************************************************	
+			
+% Table :
+---------				 
+
+
+         Nt=20, lsa=1.5d0, Bo = 0.1 et precision (int gauss) = 10-8 (pas besoin d'aller au delà)	
+         --------------------------------------------------------------------------------------
+
+   
+Ici pour theta = 2.1048670779051615
+			   _____________________________________________________________
+			  |		|			|			|
+			  |  précision 	|     Solution LU	| Solution analytique	|
+			  |_____________|_______________________|_______________________|
+			  |		|			|			|	
+			  |    100	|  -0.10086082538038403	| -0.10085622296154635 	|
+			  |    2000	|  -0.10085602656666796 | -0.10085622296155844 	| 		
+			  |    5000	|  -0.10085618132814253 | -0.10085622337695471	|
+			  |_____________|_______________________|_______________________|
+
+% Conclusion:
+-------------
+
+
+	Pour Nx=100, la différence entre les deux calculs est de l'ordre de 10-4
+	Pour Nx= 2000, de l'ordre de 10-6
+	Pour Nx=5000, de l'ordre de 10-6.
+
+	Cette précision est cohérente avec le shéma d'intégration en différence finie
+d'ordre 2 que nous utilisons pour résoudre cette équation différentielle.
+ 
+	En effet, notre erreur est de l'ordre de 10-3 pour le calcul de la dérivée seconde 
+et se répercute en Ca², soit une erreur d'ordre 10-6.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -1,0 +1,12 @@
+Nx		 2000
+Ntinitial	 20
+Ng		 7
+eps        	 1.d-10
+precision  	 1.d-15
+lsa        	 6.d0
+Bo         	 6.d-1
+gammahat	 2.d0
+fichdeformee	 deformeebulle_Bo02r2_l6.dat
+fichbulle	 bulle_Bo02r2_l6.dat
+
+

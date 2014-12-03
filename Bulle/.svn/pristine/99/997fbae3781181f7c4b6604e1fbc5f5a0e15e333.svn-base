@@ -1,0 +1,41 @@
+# Makefile
+shell = /bin/sh
+FC = gfortran 
+#FFLAGS = -fdefault-real-8 -O0 -g  -fbounds-check -pedantic-errors -ffpe-trap=invalid,zero,overflow,underflow -ftrapv -fimplicit-none -fno-automatic
+NOM = vitesseBulle.exe
+SRCS = 	Bpsi.f\
+	CalculTabsB.f\
+	diagonalessysteme1.f\
+	DLegendre.f\
+	Dpsi.f\
+	dsigma0zxB.f\
+	du0zetaB.f\
+	flegendre.f\
+	fonctionb.f\
+	Force0.f\
+	Force1.f\
+	funczeta1.f\
+	gaussint1dim.f\
+	ispline.f90\
+	lecturedata.f\
+	Legendre.f\
+	Ntoptimal.f\
+	ResolutionsystLU.f\
+	secondmembreB.f\
+	secondmembre.f\
+	sigma0xxB.f\
+	sigma0zzB.f\
+	splineA.f90\
+	surfacebulle.f\
+	thomas1d.f\
+	u0etaB.f\
+	vitesseBulle.f
+
+OBJS = $(SRCS:.f=.o)
+
+target1 : $(OBJS)
+	  $(FC) $(FFLAGS) -o $(NOM) $(OBJS) -llapack -lblas
+	mv $(NOM) ../
+
+clean :
+	rm $(OBJS)

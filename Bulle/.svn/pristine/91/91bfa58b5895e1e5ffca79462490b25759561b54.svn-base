@@ -1,0 +1,106 @@
+c****************************************************************
+c                 Sous-programme calculant les 
+c		   fonctions zeta1(xi) et zeta1'(xi) 
+c                      pour la surface libre
+c
+c	diagonalessystem,                     
+c	thomas1d : appel de sous programme
+c
+c     Programmeur: M.Guemas; Janvier 2013.
+c****************************************************************
+c2345678912345678912345678912345678912345678912345678912345678912
+
+      subroutine surfacebulle(Nt,Nx,Ng,precision,lsa,c,c2,
+     &	           zetap,lambda0,gammahat,tabsB,tabsB0,
+     &             alpha0,zeta1B,dzeta1B,tabx,R0,Rn)
+c     ===========================================================
+c     Aucune declaration implicite
+c     ----------------------------
+      implicit none
+
+c     ===========================================================
+c     Declaration des variables en entrees
+c     ------------------------------------
+      integer, intent(in) :: Nt, Nx, Ng
+      double precision, intent(in) :: lsa, c, c2, zetap
+      double precision, intent(in) :: lambda0, gammahat
+      double precision :: precision, tabsB0, alpha0,R0
+      double precision, dimension(Nt),intent(in) :: Rn
+      double precision,dimension(Nt+1) :: tabsB
+      
+c     Declaration des variables locales
+c     ---------------------------------
+      integer :: i, n, k, erreur 
+      double precision :: aux, xk, dx, y 
+
+c     Declaration des variables en sorties
+c     ------------------------------------      
+      double precision, dimension(0:Nx) :: zeta1B,dzeta1B
+      double precision, dimension(0:Nx) :: tabx
+
+c     Declaration des interfaces
+c     ---------------------------
+      interface
+
+         subroutine resolutionsystLU(Nt,Nx,Ng,precision,lsa,c,
+     &	                   c2,dx,zetap,lambda0,gammahat,tabsB,
+     &                     tabsB0,R0,Rn,tabx,zeta1B)
+	   integer, intent(in) :: Nt, Nx, Ng
+           double precision, intent(in) :: precision, lsa
+	   double precision, intent(in) :: c, c2, dx, zetap
+	   double precision, intent(in) :: lambda0, gammahat
+           double precision, intent(in) :: tabsB0, R0
+           double precision, dimension(Nt),intent(in) :: Rn
+	   double precision, dimension(Nt+1) ::	 tabsB
+	   double precision, dimension(0:Nx) :: tabx,zeta1B
+         end subroutine resolutionsystLU	
+
+
+      end interface
+
+c     ===========================================================
+
+c     Lecture de la tronquature Nt
+c     ----------------------------
+      write(*,*) 'la troncature Nt =', Nt
+
+c     Determination de dx
+c     -------------------
+      dx=2.D0/dble(Nx)      
+      write(*,*)'dx',dx
+c	 ______________________________________________________
+c	 ------ On construit le tableau des h(xi) -------------
+
+
+c     Resolution du systeme lineaire
+c     ------------------------------
+       write(*,*)'alpha0',alpha0
+      call resolutionsystLU(Nt,Nx,Ng,precision,lsa,c,c2,
+     &	                dx,zetap,lambda0,gammahat,tabsB,
+     &                  tabsB0,R0,Rn,tabx,zeta1B)
+      write(*,*) 'apres resolutionsystLU '
+
+    
+c	 ______________________________________________________
+c	 ---------- Calcul de la derivée dzeta1B --------------
+
+    
+      dx=2.d0/dble(Nx-1)  !Calcul du nouveaux pas
+      write(*,*) 'le pas dx = ', dx 
+      write(*,*) 'Nx = ', Nx 
+      dzeta1B(0)=(4*zeta1B(1)-zeta1B(2)+3*zeta1B(0))/(2.d0*dx)
+
+      do 2 k=1,Nx-1        
+       dzeta1B(k)=(zeta1B(k+1)-zeta1B(k-1))/(2.d0*dx)
+ 2    continue
+  
+      dzeta1B(Nx)=(3*zeta1B(Nx)-4*zeta1B(Nx-1)
+     &           +zeta1B(Nx-2))/(2.d0*dx)
+      
+      
+      end subroutine surfacebulle
+
+c      -------- Fin du programme--------------------------------
+****************************************************************
+c2345678912345678912345678912345678912345678912345678912345678912
+

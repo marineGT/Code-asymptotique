@@ -1,0 +1,167 @@
+
+
+***************************
+Date: 24/02/2014
+Auteur: Marine Guémas
+***************************
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%						     %
+	%	Verification de la contrainte d'ordre 0      %
+	%		    sur la bulle		     %
+	%						     %
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+*******************************************************************************************************
+% Contexte:
+-----------
+Soit une bulle remontant vers une surface libre, le calcul de la force théoriquement est
+
+	F=-6*pi*Âµ*U*a*Lambda
+
+Avec a le rayon de la bulle sphérique initialement, U la vitesse de la bulle et lambda un facteur
+correctif de la vitesse qui dépendent de la position de la bulle, soit Lambda(z).
+
+En effet, si la vitesse de la bulle lorsqu'elle est très loin de la surface est Uinf, alors sa
+vitesse à chaque instant t est 
+					U*Lambda=Uinf
+
+*******************************************************************************************************	
+
+	Cette fois ci nous utilisons la formule pour la force hydrodynamique	
+	 
+			F=-4*pi*Âµ*U*a*Lambda
+
+			
+% Table :
+---------
+Ici Nt=20.							 
+								
+	 _______________________ _______________________	 
+	|			|			|	
+	|  	Zetap	  	|	Lambda		|	
+	|_______________________|_______________________|
+	|			|			|
+ 	|     	0.5		|    2.04998111791422	|
+	|	1.0		|    1.50945547483087	|
+	|   	1.31695789692482|    1.34105981307843	|   (lsa = 2.d0)	
+	|	1.5		|    1.27344998699464	|
+	|	2.0		|    1.15369561623166	|
+	|	2.5		|    1.08882664938262	|
+	|	3.0		|    1.05226612572813	|
+	|      10.0		|    1.00004537410953   |   (lsa = 11020.d0)	
+	|_______________________|_______________________|
+
+
+*******************************************************************************************************	
+  La force à l'ordre zéro se calcul aussi en intègrant la contrainte d'ordre zéro
+  Soit  
+	F0 =  int_S { sigma0.n } dS =  	int_S { (n.sigma0.n) n } dS = 4*pi*lambda0
+	
+	F0 =  int_S { sigma0zz.n } dS = 4*pi*lambda0
+
+
+  Nous allons donc intégrer la contrainte sigma0zz calculé précisément (en bipolaire) suivant 
+  les coordonnées sphériques.
+
+  Soit
+	
+	F0.ez = 2*pi [int_{0}^{pi} { sigma0zz(teta).(n.ez)} sin(teta)dteta] = 4*pi*lambda0
+
+
+	F0.ez = int_{0}^{pi} { sigma0zz(teta)*cos(teta)*sin(teta)dteta} = 2*lambda0
+
+
+On comparera cette force obtenue avec sigma0zz avec le lambda0 calculé précédemment (à l'aide des Bn et Dn).
+
+Le test avec la méthode des trapèze nous donne bien les mêmes resultats.
+Le calcul de la contrainte normale sigma0zzB est OK.
+
+
+
+% Tables :
+---------
+
+				Nt=20, lsa=2.d0 et Bo = 1.d0
+				----------------------------
+
+    méthode des trapèzes :
+			   _____________________________________________________________
+			  |		|			|			|
+			  |  précision 	|     	zetap		|   	2*Lambda0	|
+			  |_____________|_______________________|_______________________|
+			  |		|			|			|	
+			  |    100	|   1.3169578969248166	|  -2.6813961150392855	|
+			  |    1000	|   1.3169578969248166	|  -2.6821123920680758	| 		
+			  |    2000	|   1.3169578969248166	|  -2.6821178176366041	|
+			  |_____________|_______________________|_______________________|
+				
+
+    		
+
+    point de Gauss :	
+			
+			   _____________________________________________________________
+			  |		|			|			|
+			  |  précision 	|     	zetap		|   	2*Lambda0	|
+			  |_____________|_______________________|_______________________|
+			  |		|			|			|	
+			  |    10-5	|   1.3169578969248166	|  -2.6821196289172269 	|
+			  |    10-8	|   1.3169578969248166	|  -2.6821196261565676	| 
+			  |    10-14	|   1.3169578969248166	|  -2.6821196261568621	|
+			  |_____________|_______________________|_______________________| 	
+
+			  	   
+
+    
+    Calcul avec Bn et Dn	2*Lambda0 = 2.6821196261568612
+    	   	      			  
+			%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+				Nt=20, lsa=6.d0 et Bo = 1.d0
+				----------------------------
+
+    méthode des trapèzes :
+			   _____________________________________________________________
+			  |		|			|			|
+			  |  précision 	|     	zetap		|   	2*Lambda0	|
+			  |_____________|_______________________|_______________________|
+			  |		|			|			|	
+			  |    100	|   2.4778887302884751	|  -2.1813938972181521	|
+			  |    1000	|   2.4778887302884751	|  -2.1819285111589664 	| 		
+			  |    2000	|   2.4778887302884751	|  -2.1819325607963456	|
+			  |_____________|_______________________|_______________________|
+				
+
+    		
+
+    point de Gauss :	
+			
+			   _____________________________________________________________
+			  |		|			|			|
+			  |  précision 	|     	zetap		|   	2*Lambda0	|
+			  |_____________|_______________________|_______________________|
+			  |		|			|			|	
+			  |    10-5	|  2.4778887302884751 	|  -2.1819339106738904 	|
+			  |    10-8	|  2.4778887302884751 	|  -2.1819339106739091 	| 
+			  |    10-14	|  2.4778887302884751 	|  -2.1819339106739051	|
+			  |_____________|_______________________|_______________________| 	
+
+			  	   
+
+    
+    Calcul avec Bn et Dn	2*Lambda0 = 2.1819339106739073 
+
+
+% Conclusion:
+-------------
+
+	Le calcul de la contrainte normale sur la bulle est bien vérifié, la précision du calcul de
+l'intégrale de cette contrainte est de l'ordre de 10-14 pour la méthode des points de Gauss.
+
+La Force d'odre zéro initialement calculée à l'aide des Bn et Dn ayant été vérifiée avec les calculs
+ de Bart avec la formule  F = -6*pi*Âµ*U*a*Lambda
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -1,0 +1,11 @@
+#!/bin/sh
+# Programme shell permettant l execution du programme bem
+# Appel contrainte nomdata
+
+if [ $# -eq 1 ]
+then
+  echo "$1.in" > config
+  ./vitesseBulle.exe
+else
+  echo "Il est nécessaire d'avoir 1 argument dans l'appel de bemstokes"
+fi
