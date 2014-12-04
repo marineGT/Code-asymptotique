@@ -108,9 +108,11 @@ c     Calcul de sigma0zz pour une valeur de teta
 c     ------------------------------------------
       
       !Si Bo=rho g a*a/(gamma1)
-      aux=-(sigma0zzB(Nt,c,zetap,xi,alpha,alpha0,Pn,Un,dUn)
-     &     +3.d0*lambda0*dcos(b))+cstSn
+c      aux=-(sigma0zzB(Nt,c,zetap,xi,alpha,alpha0,Pn,Un,dUn)
+c     &     +3.d0*lambda0*dcos(b))+cstSn
 
+       aux=-(0.5d0*sigma0zzB(Nt,c,zetap,xi,alpha,alpha0,Pn,Un,dUn)
+     &     +3.d0*lambda0*dcos(b))+cstSn
 
       
 c      aux=-7.d0*dcos(3.d0*b)*dsin(b)

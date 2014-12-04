@@ -13,7 +13,7 @@ c****************************************************************
 c2345678912345678912345678912345678912345678912345678912345678912
 
       function Sntot(teta,Nt,c,zetap,lambda0,alpha,
-     &               alpha0,Bn,Dn)
+     &               alpha0,Bn,Dn,cstSn)
 c     ============================================================
 c     declaration des variables en entree
 c     -----------------------------------     
@@ -24,6 +24,8 @@ c     -----------------------------------
       double precision, dimension(Nt) :: alpha
       double precision, intent(in) :: alpha0 
       double precision, dimension(Nt+1) :: Bn,Dn
+      double precision, intent(in) :: cstSn
+
 
 c     declaration des variables locales
 c     ---------------------------------
@@ -65,7 +67,6 @@ c     du code car ils seront utilisé plusieurs fois
 
 c     Soit xi en fonction de l'angle eta entre 0 et pi
 c     -----------------------------------------------
-      
       ch=dcosh(zetap)
       xi=(1.d0-dcos(teta)*ch)/(ch-dcos(teta)) 
 c      write(*,*) 'b=', b, 'teta=', teta, 'xi=', xi 
@@ -104,18 +105,21 @@ c        write(16,*) xi, n, Un(n), dUn(n)
 
 c     Calcul de la conservation du second membre pour une valeur de teta
 c     -------------------------------------------------------------------
-      !!Si Bo=rho g a*a/(gamma1) 
+      !!Si Bo=rho g a*a/(gamma1)      
       Sntot=-(sigma0zzB(Nt,c,zetap,xi,alpha,
      &     alpha0,Pn,Un,dUn)+3.d0*lambda0*dcos(teta))
-     &     *dsin(teta)*dcos(teta) 
+     &     *dsin(teta)*dcos(teta)+cstSn*dcos(teta)
 
+c$$$      Sntot=-(0.5d0*sigma0zzB(Nt,c,zetap,xi,alpha,
+c$$$     &     alpha0,Pn,Un,dUn)+3.d0*lambda0*dcos(teta))
+c$$$     &     *dsin(teta)*dcos(teta)+cstSn*dcos(teta)
 
 
 c      Sntot=(-7.d0*dcos(3.d0*teta)*dsin(teta)
 c     &       -3.d0*dcos(teta)*dsin(3.d0*teta))
 c     &       *dcos(teta)*dsin(teta)
   
-      write(16,*) teta, Sntot
+c      write(16,*) teta, Sntot
 
       end function Sntot
 c     -------- Fin du programme----------------------------------

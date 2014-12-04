@@ -7,16 +7,16 @@ c
 c
 c     Conventions:
 c     Bond  : nombre de Bond
-c     lsa   : altitude centre de la sphere/rayon a de la sphÃ¨re
+c     lsa   : altitude centre de la sphere/rayon a de la sphere
 c     Nt    : indice de troncature 
-c     coefA : coefficiant A appartenant Ã  la solution generale de 
+c     coefA : coefficiant A appartenant a la solution generale de 
 c            l'equation differentielle voir fonction zeta 
 c     zeta  : fonction liee a la deformation de l'interface
 c     eta   : coordonnee bipsherique (bipolaire), est un angle 
 c             compris entre 0 et pi      
 c     xi    : correspond a cos(eta) 
 c     c     : parametre liee a la distance l entre l'interface et la 
-c            sphere, ie sqrt(lÂ²-1)
+c            sphere, ie sqrt(lsa**2-1)
 c     Neta: 
 c     xNeta, xk : les parametres Neat et k sont en simple precision, on veut 
 c                 les utiliser aussi en double pecision, on en cree des 
@@ -179,10 +179,13 @@ c     --------------
 c      open(unit=12,file='h(xi)_avec_Cl_xi=1.dat')
 c$$$      open(unit=12,file='bulle_coor-sphe.dat')
 c      open(unit=16,file='Rn.dat')
+      open(unit=16,file='sol-tot_analytique_Bo01r1l6.dat')
 c$$$      open(unit=16,file='UndUn_resolutionLU.dat')
 c      open(unit=15,file='sol-part_Bo01l12.dat')
-c      open(unit=17,file='sol-spherique_Bo01l12.dat')
-c      open(unit=18,file='sol_totale_Bo01l12.dat')
+      open(unit=15,file='phi_Bo01r1l6.dat')
+      open(unit=17,file='sol-spherique_Bo01r1l6.dat')
+      open(unit=18,file='sol-totale_Bo01r1l6.dat')
+      open(unit=19,file='Rn_test.dat')
 c$$$      open(unit=19,file='bulle-non-deformee.dat')
 c$$$      open(unit=20,file='tesf.dat')
 
@@ -242,9 +245,8 @@ c           write(*,*) tabxi(i),zeta1(i+1)
            aux=(1.d0-tabxi(k))
            dzeta1(k+1)=((aux)**(3.d0/2.d0))*dhxi(k+1)
      &                -(3.d0/2.d0)*(aux)**(1.d0/2.d0)*hxi(k+1)
- 111      continue  
-          
-           stop
+ 111      continue           
+           
         !Construction de zeta1 pour la surface de la bulle
         !-------------------------------------------------
          call  surfacebulle(Nt,Nx,Ng,precision,lsa,c,c2,
@@ -262,13 +264,13 @@ c$$$     &       (dcosh(-zetap+Ca*zeta1B(i))-dcos(tabteta(i)))
            xb1=(1.d0+Ca*phi(i))*dsin(tabteta(i))
            zb1=(1.d0+Ca*phi(i))*dcos(tabteta(i))
 c           write(12,*) zb1, xb1 
-           write(numfichbulle,*) zb1, xb1 
+c           write(numfichbulle,*) zb1, xb1 
            xb1=(1.d0)*dsin(tabteta(i))
            zb1=(1.d0)*dcos(tabteta(i))
 c            write(12,*) tabx(i),zeta1B(i)  
 c            write(19,*) zb1, xb1 
             
-c            write(numfichbulle,*) rb,zb
+            write(numfichbulle,*) rb,zb
  12      continue
         
 	!Calcul et Sauvegarde du drainage au cours du temps
@@ -280,7 +282,7 @@ c         h=lsa-1.d0+Ca*zeta(1)
          write(numfichhmin,*) t,h     
 c         write(*,*) t,h
 c         write(*,*) 'Ca*zeta1',Ca*zeta(1)
-         
+         stop
         !Calcul de la Force a l'ordre 1 :
         !--------------------------------
 c         write(*,*)'c avant Force1', c

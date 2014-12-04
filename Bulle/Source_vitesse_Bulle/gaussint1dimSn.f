@@ -12,7 +12,7 @@ c     Programmeur: M.Guemas; Fevrier 2014.
 c****************************************************************
 
       function gaussint1dimSn(Sntot,a,b,Nt,c,zetap,lambda0,
-     &                        alpha,alpha0,Bn,Dn,prec)
+     &                        alpha,alpha0,Bn,Dn,cstSn,prec)
 c     ============================================================  
 c     Declaration des variables 
 c     -------------------------
@@ -23,11 +23,12 @@ c     -------------------------
       dimension wter(12),x(12)
       double precision x,c1,c2,prec 
 
-      double precision :: Sntot
+       double precision :: Sntot
       double precision :: c, zetap, lambda0    
       double precision, dimension(Nt) :: alpha
       double precision :: alpha0 
       double precision, dimension(Nt+1) :: Bn,Dn
+      double precision :: cstSn
       external Sntot
 
 c     Declaration des parametres
@@ -77,15 +78,15 @@ c      WRITE(*,*) 'debut gaussint2, c= ', c
       do 3 i = 1,4
       u=c2*x(i)
       s8=s8+wter(i)*(Sntot(c1+u,Nt,c,zetap,lambda0,
-     & alpha,alpha0,Bn,Dn)+Sntot(c1-u,Nt,c,zetap,lambda0,
-     & alpha,alpha0,Bn,Dn))
+     & alpha,alpha0,Bn,Dn,cstSn)+Sntot(c1-u,Nt,c,zetap,
+     & lambda0,alpha,alpha0,Bn,Dn,cstSn))
  3    continue
       s16=0
       do 4 i = 5,12
       u=c2*x(i)
       s16=s16+wter(i)*(Sntot(c1+u,Nt,c,zetap,lambda0,
-     & alpha,alpha0,Bn,Dn)+Sntot(c1-u,Nt,c,zetap,lambda0,
-     & alpha,alpha0,Bn,Dn))
+     & alpha,alpha0,Bn,Dn,cstSn)+Sntot(c1-u,Nt,c,zetap,
+     & lambda0,alpha,alpha0,Bn,Dn,cstSn))
  4    continue
       s16=c2*s16
       if(abs(s16-c2*s8) .le. eps*(1+abs(s16))) then

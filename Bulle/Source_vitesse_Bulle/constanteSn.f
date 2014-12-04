@@ -24,7 +24,7 @@ c     -----------------------------------
       double precision, dimension(Nt) :: alpha
       double precision, intent(in) :: alpha0 
       double precision, dimension(Nt+1) :: Bn,Dn
-
+      
 c     declaration des variables locales
 c     ---------------------------------
       integer :: n, k
@@ -109,6 +109,9 @@ c     ------------------------------------------
       constanteSn=-(sigma0zzB(Nt,c,zetap,xi,alpha,
      &     alpha0,Pn,Un,dUn)+3.d0*lambda0*dcos(teta))
      &     *dsin(teta)  
+c$$$      constanteSn=-(0.5d0*sigma0zzB(Nt,c,zetap,xi,alpha,
+c$$$     &     alpha0,Pn,Un,dUn)+3.d0*lambda0*dcos(teta))
+c$$$     &     *dsin(teta)  
 
 c      write(16,*) teta, xi, constanteSn
 

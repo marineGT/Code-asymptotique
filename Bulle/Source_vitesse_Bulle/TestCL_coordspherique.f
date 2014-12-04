@@ -1,3 +1,27 @@
+c
+c
+c             Sous programme calculant la forme de la bulle 
+c
+c     On resout l'equation differentielle suivante:
+c     
+c           2f sin(theta)  + f'cos(theta) + f''sin(theta) = R(theta)sin(theta)
+
+c     Le resolution de cette equation se fait a l'aide de deux methodes: 
+c     
+c         - Systeme lineaire d'une matrice triangulaire avec des CL 
+c
+c         - Solution analytique: solution particuliere totale
+
+c     -----------------
+c     Une serie de test comparant les deux methode et verifiant les conditions
+c     limites sont effectues.
+
+c     Tests sur la conservation du volume et du centre de masse
+c     Test du second membre: int_{0}^{pi} R(theta)sin(theta)dtheta = 0
+c     
+c     ==================================================================
+c     ==================================================================
+
       subroutine TestCL(Nt,Nx,c,zetap,lambda0,alpha,alpha0,Bn,
      &                  Dn,tabsigma0zz,phi,tabteta)
 c     ==================================================================
@@ -30,7 +54,7 @@ c     ---------------------------------
       double precision :: grxi,sum,aux,sum1,sum2
       double precision :: aux1, aux2, aux3
       double precision :: prec, e, f
-      double precision :: cstSn, cstCM
+      double precision :: cstSn, cstCM, A
       double precision :: testf
       double precision,dimension(7) :: x,wter
       character*1 :: TRANS, NORM
@@ -119,7 +143,7 @@ c     --------------------------
         end function solpartitest
 
         function Sntot(teta,Nt,c,zetap,lambda0,alpha,
-     &               alpha0,Bn,Dn)
+     &               alpha0,Bn,Dn,cstSn)
           integer, intent(in)  ::  Nt      
           double precision, intent(in)  :: teta
           double precision, intent(in) ::  c, zetap
@@ -127,6 +151,7 @@ c     --------------------------
           double precision, dimension(Nt) :: alpha
           double precision, intent(in) :: alpha0 
           double precision, dimension(Nt+1) :: Bn,Dn
+          double precision, intent(in) :: cstSn
           double precision :: Sntot        
         end function Sntot
       
@@ -218,7 +243,7 @@ c          yse(n,1)=dsin(teta)
 c         yse(n,1)=-2.d0*dcos(2.d0*teta)*dsin(teta)
 c     &           -2.d0*dcos(teta)*dsin(2.d0*teta)
 c        yse(n,1)=0.d0
-c        write(17,*) teta, yse(n,1),Sn,aux
+        write(19,*) teta, yse(n,1),Sn,aux
  2    continue 
 
 c     valeur de yse pour n=Nx+1
@@ -278,9 +303,9 @@ c     phi'(teta=pi) = 0 en  teta=pi (tangente horizontale)
        amat(Nx+1,Nx)=-2.d0*invdteta      
        amat(Nx+1,Nx+1)=(3.d0/2.d0)*invdteta
 c       write(*,*)
-       write(*,*)'amat(Nx+1,Nx+1)=',amat(Nx+1,Nx+1)
-       write(*,*)'amat(Nx+1,Nx)=',amat(Nx+1,Nx)
-       write(*,*)'amat(Nx+1,Nx-1)=',amat(Nx+1,Nx-1)
+c$$$       write(*,*)'amat(Nx+1,Nx+1)=',amat(Nx+1,Nx+1)
+c$$$       write(*,*)'amat(Nx+1,Nx)=',amat(Nx+1,Nx)
+c$$$       write(*,*)'amat(Nx+1,Nx-1)=',amat(Nx+1,Nx-1)
 
 
 c     Test du second membre
@@ -295,7 +320,7 @@ c            sum1=sum1+yse(n,1)*dcos(teta)
 c        teta=pi
 c        sum1=sum1+yse(Nx,1)
         sum1=-0.5d0*sum1*dteta
-        write(*,*) 'constante ajoutee au second membre', 
+        write(*,*) 'constante ajoutee au second membre (trapeze)', 
      &               sum1
 
        prec=1.d-14 ! precision de l'integrale
@@ -304,14 +329,15 @@ c        sum1=sum1+yse(Nx,1)
        cstSn=gaussint1dim4(constanteSn,e,f,Nt,c,zetap,
      &             lambda0,alpha,alpha0,Bn,Dn,prec)
        cstSn=-0.5d0*cstSn
-        write(*,*) 'constante ajoutee au second membre', 
+        write(*,*) 'constante ajoutee au second membre (gauss)', 
      &              cstSn
 
 c     Modification du second membre !!!
 c     ---------------------------------
       do n=2,Nx
         teta=dble(n-1)*dteta        
-        yse(n,1)=yse(n,1)+cstSn*dsin(teta)
+c        yse(n,1)=yse(n,1)+cstSn*dsin(teta)
+        yse(n,1)=yse(n,1)+cstSn
       enddo
 
 c     Test du second membre
@@ -323,15 +349,14 @@ c     ---------------------
        sum1=sum1+yse(n,1)*dcos(teta)
       enddo
       sum1=sum1*dteta
-      write(*,*) 'test integrale second membre', sum1  
+      write(*,*) 'test integrale second membre (trapeze)', sum1  
 
       prec=1.d-14 ! precision de l'integrale
       e=0.d0 
       f=pi
       sum1=gaussint1dimSn(Sntot,e,f,Nt,c,zetap,lambda0,
-     &                    alpha,alpha0,Bn,Dn,prec)
-       
-      write(*,*) 'test integrale second membre', sum1  
+     &                    alpha,alpha0,Bn,Dn,cstSn,prec)       
+      write(*,*) 'test integrale second membre (gauss)', sum1  
 
 
 c$$$c     Test solution phi=cos(3teta)
@@ -407,12 +432,44 @@ c     ---------------------------------------------
 c       write(15,*) teta, phi(n), dcos(2.d0*teta),
 c     &             dcos(teta)   
         write(15,*) teta, phi(n), dcos(teta)   
- 66    continue
-       write(15,*) pi, phi(Nx), -1.d0
-      write (*,*) 'phi(0)=',phi(0)
-      write (*,*) 'phi(Nx)=',phi(Nx)
+ 66    continue      
+c      write (*,*) 'phi(0)=',phi(0)
+c      write (*,*) 'phi(Nx)=',phi(Nx)
       tabteta(0)=0.d0
       tabteta(Nx)=pi
+
+
+c     Test sur le centre de masse 
+c     ---------------------------
+      sum2=(phi(0)+phi(Nx))/2.d0
+       do n=2,Nx
+         teta=dble(n-1)*dteta
+         sum2=sum2+phi(n-1)*dsin(teta)*dcos(teta)   
+       enddo
+        sum2=sum2*dteta
+        write(*,*) 'constante conservation CM (trapeze)', sum2 
+      prec=1.d-14
+      e=0.d0
+      f=pi
+      call spline(tabteta,phi,b1,e1,d1,Nx) 
+      
+      cstCM=gaussint1dim5(constanteCM,e,f,Nx,phi,
+     &                   tabteta,b1,e1,d1,prec)
+
+      write(*,*) 'constante conservation CM (gauss)', cstCM
+
+      !ici , cstCM= int_{0}^{pi} f(u)sin(u)cos(u)du (voir manuscrit these, Chap 4)
+
+c     Solution totale fp + Acos(teta)
+c     -------------------------------   
+      A=3.d0*cstCM/2.d0
+      do  n=1,Nx+1 
+        teta=dble(n-1)*dteta
+        yse(n,1)=yse(n,1)-A*dcos(teta)
+        phi(n-1)=yse(n,1)
+c        yse(n,1)=yse(n,1)-3.d0*sum2*dcos(teta)/2.d0
+        write(17,*) teta, yse(n,1)    
+      enddo
 
 c     Test de la conservation du volume
 c     ---------------------------------
@@ -426,35 +483,6 @@ c     methode des trapezes
         write(*,*) 'test conservation volume', sum2 
 c     Fin methode des trapèzes
 
-c     Test sur le centre de masse
-c     ---------------------------
-      sum2=(phi(0)+phi(Nx))/2.d0
-       do n=2,Nx
-         teta=dble(n-1)*dteta
-         sum2=sum2+phi(n-1)*dsin(teta)
-     &       *dcos(teta)   
-       enddo
-        sum2=sum2*dteta
-        write(*,*) 'constante conservation CM', sum2 
-      prec=1.d-14
-      e=0.d0
-      f=pi
-      call spline(tabteta,phi,b1,e1,d1,Nx) 
-      
-      cstCM=gaussint1dim5(constanteCM,e,f,Nx,phi,
-     &                   tabteta,b1,e1,d1,prec)
-
-      write(*,*) 'constante conservation CM', cstCM
-
-c     Solution totale fp + Acos(teta)
-c     -------------------------------        
-      do  n=1,Nx+1 
-        teta=dble(n-1)*dteta
-        yse(n,1)=yse(n,1)-3.d0*cstCM*dcos(teta)/2.d0
-c        yse(n,1)=yse(n,1)-3.d0*sum2*dcos(teta)/2.d0
-        write(17,*) teta, yse(n,1)    
-      enddo
-
 c     Calcul de la solution particuliere totale
 c     ------------------------------------------
       !Phip(teta)= int_{0}^{teta} { sin(u)S(u)
@@ -462,11 +490,11 @@ c     ------------------------------------------
       !             -cos(teta)*(1+cos(u)*log(tan(u/2)))] du 
       !            }
         
-c     Avec S(u) = -[sigma0zzB(u) + 3*lambda0*cos(u)]
+c     Avec S(u) = -[0.5*sigma0zzB(u) + 3*lambda0*cos(u)]
        prec=1.d-5 ! precision de l'integrale
        e=0.d0 
        teta=dteta
-      do n=2,Nx+1 
+      do n=1,Nx+1 
         teta=dble(n-1)*dteta
         f=teta
         phipart(n-1)=gaussint1dim3(solparticuliere,e,
@@ -474,19 +502,20 @@ c     Avec S(u) = -[sigma0zzB(u) + 3*lambda0*cos(u)]
      &           alpha0,Bn,Dn,cstSn,prec)
         write(18,*) teta, phipart(n-1)
       enddo
-      f=pi
-      teta=pi
-      sum2=0.d0
-      sum2=gaussint1dim3(solparticuliere,e,f,teta,Nt,c,
-     &     zetap,lambda0,alpha,alpha0,Bn,Dn,cstSn,prec)
-      write(18,*) pi, sum2
+c$$$      f=pi
+c$$$      teta=pi
+c$$$      sum1=0.d0
+c$$$      sum1=gaussint1dim3(solparticuliere,e,f,teta,Nt,c,
+c$$$     &     zetap,lambda0,alpha,alpha0,Bn,Dn,cstSn,prec)
+c$$$      write(18,*) pi, sum1
 
-      sum2=0.d0
-      do n=1,Nx+1
-        teta=dble(n-1)*dteta
-        sum2=dcos(3.d0*teta)-dcos(teta)
-        write(20,*) teta, sum2 
-      enddo
+       !test volume avec f=cos(3*teta)
+c$$$      sum2=0.d0
+c$$$      do n=1,Nx+1
+c$$$        teta=dble(n-1)*dteta
+c$$$        sum2=dcos(3.d0*teta)-dcos(teta)
+c$$$        write(20,*) teta, sum2 
+c$$$      enddo
 
       !test volume avec f=cos(3*teta)
       
@@ -498,48 +527,56 @@ c       testf=gaussint1dimtest(solpartitest,e,f,prec)
 c       write(*,*) 'test volume testf', testf
        
 
-c      write(*,*) 'Solution particuliere en pi', sum2            
-      
-c$$$c     Test de la conservation du volume
-c$$$c     ---------------------------------
-c$$$c     methode des trapezes      
-c$$$         sum2=(phipart(Nx))/2.d0
-c$$$         do n=2,Nx
-c$$$            teta=dble(n-1)*dteta
-c$$$            sum2=sum2+phipart(n-1)*dsin(teta)
-c$$$         enddo
-c$$$        sum2=sum2*dteta
-c$$$        write(*,*) 'test volume sol theo', sum2 
-c$$$c     Fin methode des trapèzes
-c$$$
-c$$$      call spline(tabteta,phipart,b1,e1,d1,Nx)      
-c$$$      prec=1.d-12
-c$$$      sum2=gaussint1dim6(testvolume,e,f,Nx,phipart,
-c$$$     &                   tabteta,b1,e1,d1,prec)
-c$$$
-c$$$      write(*,*) 'test volume sol theo', sum2 
+c      write(*,*) 'Solution particuliere en pi', sum2  
 
 
-c     Solution totale fp + Acos(teta)
-c     ------------------------------------------
-        do n=1,Nx+1 
+c     Solution totale theorique phi = fp + Acos(teta)
+c     -----------------------------------------------
+        do n=1,Nx
           teta=dble(n-1)*dteta 
-          phi(n-1)=yse(n,1)
-c          write(15,*) teta, phi(n-1)
-        enddo   
+          phi(n-1)=-A*dcos(teta)+phipart(n-1)
+          write(16,*) teta, phi(n-1)
+        enddo  
+         phi(Nx)=-A*dcos(pi)+phipart(Nx)
+         write(16,*) pi, phi(Nx)
+      
+c     Test de la conservation du volume
+c     ---------------------------------
+c     methode des trapezes      
+        ! sum2=(phipart(Nx))/2.d0
+         sum2=(phi(0)+phi(Nx))/2.d0
+         do n=2,Nx
+            teta=dble(n-1)*dteta
+           ! sum2=sum2+phipart(n-1)*dsin(teta)
+            sum2=sum2+phi(n-1)*dsin(teta)
+         enddo
+        sum2=sum2*dteta
+        write(*,*) 'test volume sol theo (trapeze)', sum2 
+c     Fin methode des trapèzes
+
+      !call spline(tabteta,phipart,b1,e1,d1,Nx) 
+      call spline(tabteta,phi,b1,e1,d1,Nx) 
+      prec=1.d-12
+      sum2=gaussint1dim6(testvolume,e,f,Nx,phi,
+     &                   tabteta,b1,e1,d1,prec)
+c      sum2=gaussint1dim6(testvolume,e,f,Nx,phipart,
+c     &                   tabteta,b1,e1,d1,prec)
+      write(*,*) 'test volume sol theo (gauss)', sum2 
+
+
 
 c     Test de la conservation du centre de masse
 c     ------------------------------------------
 c     methode des trapezes      
-         sum2=(yse(1,1)+yse(Nx+1,1))/2.d0
+         sum2=(phi(0)+phi(Nx))/2.d0
          do n=2,Nx 
             teta=dble(n-1)*dteta
-            sum2=sum2+yse(n,1)*dsin(teta)
+            sum2=sum2+phi(n-1)*dsin(teta)
      &           *dcos(teta)   
          enddo
         sum2=sum2*dteta
-        write(*,*) 'test barycentre', sum2 
-        write(*,*) 'phi(Nx)=', phi(Nx)
+        write(*,*) 'test barycentre (trapeze)', sum2 
+c        write(*,*) 'phi(Nx)=', phi(Nx)
         
         do n=1,Nx
            b1(n)=0.d0
@@ -555,7 +592,7 @@ c     methode des trapezes
       sum2=gaussint1dim7(testcentremasse,e,f,Nx,
      &         phi,tabteta,b1,e1,d1,prec)
 
-      write(*,*) 'test barycentre', sum2 
+      write(*,*) 'test barycentre (gauss) ', sum2 
       
 c$$$      call spline(tabteta,phipart,b1,e1,d1,Nx) 
 c$$$      

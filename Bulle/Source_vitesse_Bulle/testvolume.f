@@ -43,7 +43,7 @@ c     ---------------------------
       end interface
 c     ================================================================== 
 
-c     On interpole la valuer de phi correspondant au teta
+c     On interpole la valeur de phi correspondant au teta
 c     --------------------------------------------------- 
       gInt=ispline(teta,tabg,g,b,e,d,Nx) 
 c      write (*,*) 'gInt=', gInt
